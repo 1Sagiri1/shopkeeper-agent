@@ -21,7 +21,11 @@ class EmbeddingClientManager:
         self.config = config
 
     def _get_url(self) -> str:
-        """拼接 Embedding 服务地址"""
+        """
+        拼接 Embedding 服务地址
+        Q: 可能报错，model参数传http开头的会抛异常
+        A: 因为 langchain-huggingface 在版本1.2.2之后加入了校验，不再支持传入url，把版本降级就行
+        """
         return f"http://{self.config.host}:{self.config.port}"
 
     def init(self):

@@ -48,8 +48,10 @@ services:
       - qdrant_data:/qdrant/storage
 
   embedding:
-    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.8
-    platform: linux/amd64
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-arm64-latest
+    platform: linux/arm64
+    # image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.8
+    # platform: linux/amd64
     container_name: embedding
     restart: unless-stopped
     ports:
