@@ -7,6 +7,9 @@ MySQL 客户端管理器
 方便脚本入口 服务层和仓储层按统一方式访问数据库
 """
 
+# TODO: 以后可以加一个 PyODPS 客户端连接MaxCompute
+# TODO: 最好有个relationship 表记录不同表之间的关联字段关系，等复杂性上来后可以换成Neo4j的图结构
+
 import asyncio
 
 from sqlalchemy import text
@@ -41,6 +44,7 @@ class MySQLClientManager:
         """初始化 Engine 和 Session 工厂"""
         # 创建异步 Engine，相当于先把“数据库连接能力”准备好
         self.engine = create_async_engine(
+            # TODO: 实际部署后可以适当修改可复用连接数，并完善告警信息。
             self._get_url(), pool_size=10, pool_pre_ping=True
         )
         # 基于 Engine 创建 Session 工厂，后面真正查库时再拿 session

@@ -56,9 +56,27 @@ async def recall_column(state: DataAgentState, runtime: Runtime[DataAgentContext
             current_column_infos: list[
                 ColumnInfo
             ] = await column_qdrant_repository.search(embedding)
+
+            # 召回的候选column根据id去重
             for column_info in current_column_infos:
                 if column_info.id not in column_info_map:
                     column_info_map[column_info.id] = column_info
+
+        # TODO: 如果后续关键词数量变多，可以把 Embedding 改成批量处理，减少 Embedding 请求次数
+        # keyword_list = list(keywords)
+        # embeddings: list[list[float]] = await embedding_client.aembed_documents(
+        #     keyword_list
+        # )
+
+        # column_info_map: dict[str, ColumnInfo] = {}
+
+        # for keyword, embedding in zip(keyword_list, embeddings):
+        #     current_column_infos: list[ColumnInfo] = await column_qdrant_repository.search(
+        #         embedding
+        #     )
+        #     for column_info in current_column_infos:
+        #         if column_info.id not in column_info_map:
+        #             column_info_map[column_info.id] = column_info
 
         # 写回 state 的是去重后的 ColumnInfo 列表，不暴露 Qdrant 原始 point 结构
         retrieved_column_infos: list[ColumnInfo] = list(column_info_map.values())

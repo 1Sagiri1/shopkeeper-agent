@@ -41,6 +41,8 @@ async def merge_retrieved_info(
         # 本节点的主线是：
         # 字段召回 + 指标依赖字段 + 字段真实取值 + 主外键补齐
         # -> table_infos / metric_infos，交给后续过滤和 SQL 生成节点继续使用。
+        # 对于召回的字段来说，召回的指标、值信息、还有相关字段所在表的主外键
+        # 都有可能包含在用户问题里没有出现的字段信息，所以需要在这一层做补齐。
 
         # 1. 以 column_id 为 key 合并字段信息
         # 三路召回可能命中同一个字段，用 dict 可以自然去重；
@@ -90,6 +92,7 @@ async def merge_retrieved_info(
         # 5. 补齐主外键字段
         # 主外键通常不会出现在用户问题里，单靠向量召回容易漏掉；
         # 但多表查询的 Join 路径必须依赖它们，所以每张候选表都要兜底补齐。
+        # TODO: 复杂度上来后可以考虑增加 Neo4j 来维护表之间的关联关系
         for table_id in table_to_columns_map.keys():
             key_columns: list[
                 ColumnInfo

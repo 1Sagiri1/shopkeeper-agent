@@ -40,6 +40,7 @@ async def build(config_path: Path):
     es_client_manager.init()
 
     async with (
+        # session_factory(可调用的 async_sessionmaker) → AsyncSession → 交给 async with 管理生命周期
         meta_mysql_client_manager.session_factory() as meta_session,
         dw_mysql_client_manager.session_factory() as dw_session,
     ):
@@ -75,7 +76,12 @@ async def build(config_path: Path):
 if __name__ == "__main__":
     # 解析命令行参数，由外部决定本次构建使用哪份配置文件
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--conf", required=True)
+    parser.add_argument(
+        "-c",
+        "--conf",
+        required=True,
+        help="meta_config.yaml 的路径",
+    )
     args = parser.parse_args()
 
     # 将字符串路径转成 Path，再启动异步 build

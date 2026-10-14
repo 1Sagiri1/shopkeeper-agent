@@ -92,6 +92,9 @@ class MetaKnowledgeService:
                 )
                 column_infos.append(column_info)
 
+        # 开启事务：save_* 方法通过 add_all() 将 ORM 对象加入 Session，
+        # 事务正常结束时自动 flush 并 commit，发生异常则 rollback
+        # BUG : 重复插入时，会因为插入失败导致下游qdrant也运行失败, 此时要返回查询结果
         async with self.meta_mysql_repository.session.begin():
             self.meta_mysql_repository.save_table_infos(table_infos)
             self.meta_mysql_repository.save_column_infos(column_infos)
@@ -134,7 +137,8 @@ class MetaKnowledgeService:
         # 这样更容易控制单次请求大小
         embeddings: list[list[float]] = []
         embedding_texts = [point["embedding_text"] for point in points]
-        embedding_batch_size = 20
+        # NOTE: 原来是20,但是可能导致负载过高，故改成5
+        embedding_batch_size = 5
         for i in range(0, len(embedding_texts), embedding_batch_size):
             batch_embedding_texts = embedding_texts[i : i + embedding_batch_size]
             batch_embeddings = await self.embedding_client.aembed_documents(
@@ -154,6 +158,7 @@ class MetaKnowledgeService:
         await self.value_es_repository.ensure_index()
 
         # 不是所有字段都要同步真实值，是否同步由配置里的 sync 显式控制
+        # 把配置整理成“字段 id -> 是否同步真实值”的快速查询表
         column2sync: dict[str, bool] = {}
         for table in meta_config.tables:
             for column in table.columns:
@@ -161,6 +166,7 @@ class MetaKnowledgeService:
 
         value_infos: list[ValueInfo] = []
         for column_info in column_infos:
+            # 根据字段 id 判断该字段是否需要同步取值
             sync = column2sync[column_info.id]
             if sync:
                 # 这里拿的是字段真实值全集，不再是第 8 章里的少量 examples
@@ -246,7 +252,7 @@ class MetaKnowledgeService:
         # 返回的 embeddings 要继续和前面的 id payload 按顺序对齐
         embeddings: list[list[float]] = []
         embedding_texts = [point["embedding_text"] for point in points]
-        embedding_batch_size = 20
+        embedding_batch_size = 5
         for i in range(0, len(embedding_texts), embedding_batch_size):
             batch_embedding_texts = embedding_texts[i : i + embedding_batch_size]
             batch_embeddings = await self.embedding_client.aembed_documents(

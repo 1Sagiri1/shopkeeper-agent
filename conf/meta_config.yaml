@@ -164,6 +164,7 @@ tables:
         sync: false
 
 metrics:
+  # TODO: 要考虑如果指标涉及到多个字段的计算的情况
   - name: GMV
     description: 全称Gross Merchandise Value，表示所有订单的成交金额总和。
     relevant_columns:

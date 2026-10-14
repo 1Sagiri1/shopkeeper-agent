@@ -39,6 +39,18 @@ from app.repositories.mysql.meta.meta_mysql_repository import MetaMySQLRepositor
 from app.repositories.qdrant.column_qdrant_repository import ColumnQdrantRepository
 from app.repositories.qdrant.metric_qdrant_repository import MetricQdrantRepository
 
+
+"""
+# TODO: 生产级可以考虑 Pydantic BaseModel 以规定更严格的入参/出参校验
+# TODO: LangGraph 还有很多进阶能力，例如 Send、Command、节点缓存、重试、状态持久化、时间回溯、子图、多智能体和 A2A。
+等这条问数主链路跑通后，如果后续要支持更复杂的生产能力，再逐步引入：
+
+用持久化保存长任务状态，支持失败恢复；
+用更细的流式事件做前端可观测；
+用子图拆分复杂子流程；
+用多智能体拆分“数据分析师、SQL 工程师、结果解释器”等角色。
+
+"""
 # StateGraph 声明整张图使用的状态结构和运行时上下文结构
 graph_builder = StateGraph(state_schema=DataAgentState, context_schema=DataAgentContext)
 

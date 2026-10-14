@@ -21,7 +21,7 @@ log_format = (
     "<level>{message}</level>"
 )
 
-
+# TODO : 日后新增用户权限控制时，要把用户信息也加入上下文，比如user_id_ctx_var
 def inject_request_id(record):
     """把上下文中的 request_id 注入到每条日志的 extra 字段"""
     request_id = request_id_ctx_var.get()
